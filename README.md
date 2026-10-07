@@ -22,6 +22,7 @@ This repository contains **20+ specialized tools and functions** designed to enh
 - **YouTube Search & Embed** - Search YouTube and play videos in embedded player
 - **Xquik X Data Tool** - Search and look up X posts, users, timelines, and trends
 - **OutageDeck Provider Status** - Check provider health and incident timelines without an API key
+- **FXMacroData Macro & FX Data** - Official macro releases, release calendars and FX rates for 22 currencies (recent USD data needs no API key)
 - **Native Image Generator** - Direct Open WebUI image generation with Ollama model management
 - **Hugging Face Image Generator** - AI-powered image creation
 - **ComfyUI Image-to-Image (Qwen Edit 2509)** - Advanced image editing with multi-image support
@@ -119,30 +120,31 @@ Most tools are designed to work with minimal configuration. Key configuration ar
 14. [OpenWeatherMap Forecast Tool](#openweathermap-forecast-tool)
 15. [Xquik X Data Tool](#xquik-x-data-tool)
 16. [OutageDeck Provider Status](#outagedeck-provider-status)
-17. [Flux Kontext ComfyUI Pipe](#flux-kontext-comfyui-pipe)
-18. [Google Veo Text-to-Video & Image-to-Video Pipe](#google-veo-text-to-video--image-to-video-pipe)
-19. [MiniMax LLM Pipe](#minimax-llm-pipe)
-20. [Planner Agent v3](#planner-agent-v3)
-21. [arXiv Research MCTS Pipe](#arxiv-research-mcts-pipe)
-22. [Multi Model Conversations v2 Pipe](#multi-model-conversations-v2-pipe)
-23. [Resume Analyzer Pipe](#resume-analyzer-pipe)
-24. [Mopidy Music Controller](#mopidy-music-controller)
-25. [Letta Agent Pipe](#letta-agent-pipe)
-26. [Perplexica Pipe](#perplexica-pipe)
-27. [OpenRouter Image Pipe](#openrouter-image-pipe)
-28. [OpenRouter WebSearch Citations Filter](#openrouter-websearch-citations-filter)
-29. [Doodle Paint Filter](#doodle-paint-filter)
-30. [Prompt Enhancer Filter](#prompt-enhancer-filter)
-31. [Semantic Router Filter](#semantic-router-filter)
-32. [Full Document Filter](#full-document-filter)
-33. [Clean Thinking Tags Filter](#clean-thinking-tags-filter)
-34. [Using the Provided ComfyUI Workflows](#using-the-provided-comfyui-workflows)
-35. [Installation](#installation)
-36. [Contributing](#contributing)
-37. [License](#license)
-38. [Credits](#credits)
-39. [Support](#support)
-40. [SerpBase Google Search Tool](#serpbase-google-search-tool)
+17. [FXMacroData Macro & FX Data](#fxmacrodata-macro--fx-data)
+18. [Flux Kontext ComfyUI Pipe](#flux-kontext-comfyui-pipe)
+19. [Google Veo Text-to-Video & Image-to-Video Pipe](#google-veo-text-to-video--image-to-video-pipe)
+20. [MiniMax LLM Pipe](#minimax-llm-pipe)
+21. [Planner Agent v3](#planner-agent-v3)
+22. [arXiv Research MCTS Pipe](#arxiv-research-mcts-pipe)
+23. [Multi Model Conversations v2 Pipe](#multi-model-conversations-v2-pipe)
+24. [Resume Analyzer Pipe](#resume-analyzer-pipe)
+25. [Mopidy Music Controller](#mopidy-music-controller)
+26. [Letta Agent Pipe](#letta-agent-pipe)
+27. [Perplexica Pipe](#perplexica-pipe)
+28. [OpenRouter Image Pipe](#openrouter-image-pipe)
+29. [OpenRouter WebSearch Citations Filter](#openrouter-websearch-citations-filter)
+30. [Doodle Paint Filter](#doodle-paint-filter)
+31. [Prompt Enhancer Filter](#prompt-enhancer-filter)
+32. [Semantic Router Filter](#semantic-router-filter)
+33. [Full Document Filter](#full-document-filter)
+34. [Clean Thinking Tags Filter](#clean-thinking-tags-filter)
+35. [Using the Provided ComfyUI Workflows](#using-the-provided-comfyui-workflows)
+36. [Installation](#installation)
+37. [Contributing](#contributing)
+38. [License](#license)
+39. [Credits](#credits)
+40. [Support](#support)
+41. [SerpBase Google Search Tool](#serpbase-google-search-tool)
 ---
 
 ## 🧪 Tools
@@ -961,6 +963,52 @@ Check current provider and service health, find active incidents, and inspect in
 - **Update Timelines**: Returns bounded incident histories for root-cause context
 - **Safe Requests**: Uses a fixed HTTPS origin, strict slug validation, timeouts, and no redirects
 - **Bounded Output**: Selects the operational fields models need instead of returning oversized payloads
+
+---
+
+### FXMacroData Macro & FX Data
+
+### Description
+
+Look up official central-bank and statistics-office data for 22 currencies through the [FXMacroData API](https://fxmacrodata.com/documentation?utm_source=github&utm_medium=referral&utm_campaign=open-webui-tools&utm_content=readme): the release history of an indicator (CPI, policy rate, payrolls, GDP, unemployment...) with the value, previous value, reference period and publication time of each release, the upcoming release calendar, the indicators published for a currency, and daily FX rates. The tool is read-only and calls the API from the Open WebUI server.
+
+**Install:** copy [the tool file](tools/fxmacrodata_macro_tool.py) into Workspace > Tools.
+
+### Configuration
+
+- `REQUEST_TIMEOUT_SECONDS` (int): Request timeout from 5 to 120 seconds (default: 30)
+- User valve `FXMACRODATA_API_KEY` (optional, per user): each user can add their own key
+
+**Prerequisites**: None for recent USD data. Without a key the tool returns USD releases from the last 90 days (each published with a 15-minute delay), the USD release calendar and every currency's indicator list, and keyless results say so in a `notices` field. Other currencies, full history, real-time releases and FX rates need a key from [fxmacrodata.com](https://fxmacrodata.com/subscribe?utm_source=github&utm_medium=referral&utm_campaign=open-webui-tools&utm_content=readme).
+
+### Usage
+
+- **Latest print and history:**
+
+  ```python
+  What did US CPI print for the last six months, and when was each release published?
+  ```
+
+- **What is coming up:**
+
+  ```python
+  When is the next US payrolls report?
+  ```
+
+- **Find an indicator:**
+
+  ```python
+  Which indicators are available for the yen?
+  ```
+
+### Features
+
+- **Four Tools**: `get_indicator_history`, `get_release_calendar`, `list_indicators`, `get_fx_rates`
+- **Reference Period vs Release Time**: `period` is the month or quarter a figure describes; publication time is reported separately
+- **Keyless Start**: Recent USD data works without an account, with the limits passed through to the model
+- **Per-User Keys**: The key lives in User Valves, sent only as an `X-API-Key` header and removed from every result and error
+- **Safe Requests**: Fixed HTTPS origin, redirects refused, timeouts, validated currency codes, slugs and dates, and clean errors for malformed responses
+- **Bounded Output**: Selects the fields models need and caps rows at 100
 
 ---
 
